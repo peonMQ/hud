@@ -6,7 +6,7 @@ local luautil = require 'utils/lua'
 --- @type ImGui
 require 'ImGui'
 
-local groupLayoutMode = configuration.LoadConfig("grouplayout", nil, "data/HUD") or {}
+local groupLayoutMode = configuration("grouplayout", nil, "data/HUD") or {}
 local useGroupLayoutMode = next(groupLayoutMode)
 
 -- https://jsfiddle.net/dkLec6xs/

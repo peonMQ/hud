@@ -1,7 +1,8 @@
 {
     "editor.bracketPairColorization.enabled": true,
     "files.exclude": {
-        "lua/emmylua/": true
+        "definitions/": true,
+        "utils/": true,
     },
     "workbench.colorCustomizations": {
         "editorBracketHighlight.foreground1": "#5caeef",
@@ -18,6 +19,7 @@
     "Lua.runtime.version": "Lua 5.1",
     "Lua.workspace.library": [
         "./definitions/mq",
-        "./definitions/imgui"
+        "./definitions/imgui",
+        "./utils",
     ],
 }
