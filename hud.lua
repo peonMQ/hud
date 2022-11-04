@@ -90,19 +90,16 @@ local distTransition = ColorTransition:new(DarkCyan, Orange)
 
 ---@class HUDItem
 ---@field public Text string
----@field public Size integer
 ---@field public Color Color
-local HUDItem = {Text="", Size = 0, Color = White}
+local HUDItem = {Text="", Color = White}
 
 ---@param text string
----@param size integer
 ---@param color? Color
 ---@return HUDItem
-function HUDItem:new (text, size, color)
+function HUDItem:new (text, color)
   self.__index = self
   local o = setmetatable({}, self)
   o.Text = text or "NA"
-  o.Size = size or 0
   o.Color = color or White
   return o
 end
@@ -125,22 +122,22 @@ local HUDBot = {Name=HUDItem, Level=HUDItem, PctHP=HUDItem, PctMana=HUDItem, XP=
 function HUDBot:new (netbot)
   self.__index = self
   local o = setmetatable({}, self)
-  o.Name = HUDItem:new(netbot.Name(), 90)
-  o.Level = HUDItem:new(""..netbot.Level(), 20)
-  o.PctHP = HUDItem:new("HP:"..netbot.PctHPs().."%", 60, hpTransition:ByPercent(netbot.PctHPs()))
+  o.Name = HUDItem:new(netbot.Name())
+  o.Level = HUDItem:new(""..netbot.Level())
+  o.PctHP = HUDItem:new(netbot.PctHPs().."%", hpTransition:ByPercent(netbot.PctHPs()))
   if netbot.MaxMana() ~= "NULL" and netbot.MaxMana() > 0 then
-    o.PctMana = HUDItem:new("MP:"..netbot.PctMana().."%", 60, mpTransition:ByPercent(netbot.PctMana()))
-  else 
-    o.PctMana = HUDItem:new("", 60)
+    o.PctMana = HUDItem:new(netbot.PctMana().."%", mpTransition:ByPercent(netbot.PctMana()))
+  else
+    o.PctMana = HUDItem:new("")
   end
 
   if netbot.PctExp() ~= "NULL" and netbot.PctExp() < 100 then
-    o.XP = HUDItem:new("XP:"..string.format("%.2f", netbot.PctExp()).."%", 62, PastelGreen)
+    o.XP = HUDItem:new(string.format("%.2f", netbot.PctExp()).."%", PastelGreen)
   else
-    o.XP = HUDItem:new("XP: -", 62, PastelGreen)
+    o.XP = HUDItem:new("-", PastelGreen)
   end
 
-  local distanceText = "D:%s"
+  local distanceText = "%s"
   local distanceColor = nil
   if netbot.ID() == mq.TLO.Me.ID() then
     distanceText = ""
@@ -155,7 +152,8 @@ function HUDBot:new (netbot)
     distanceColor = Orange
     distanceText = string.format(distanceText, mq.TLO.Zone(netbot.Zone()).ShortName())
   end
-  o.Distance = HUDItem:new(distanceText, 60, distanceColor)
+
+  o.Distance = HUDItem:new(distanceText, distanceColor)
 
   local targetText = ""
   if netbot.TargetID() then
@@ -165,22 +163,22 @@ function HUDBot:new (netbot)
       if string.len(targetName) > 20 then
         targetName = string.sub(targetName, 0, 18)..".."
       end
-      targetText = "T:"..targetName
+      targetText = targetName
     end
   end
-  o.Target = HUDItem:new(targetText, 140, BloodOrange)
-  
+  o.Target = HUDItem:new(targetText, BloodOrange)
+
   local petText = ""
   if netbot.PetID() ~= "NULL"and netbot.PetID() > 0 then
-    petText = "P:"..netbot.PetHP().."%"
+    petText = netbot.PetHP().."%"
   end
-  o.Pet = HUDItem:new(petText, 60, hpTransition:ByPercent(netbot.PetHP()))
-  
+  o.Pet = HUDItem:new(petText, hpTransition:ByPercent(netbot.PetHP()))
+
   local castingText = ""
   if netbot.Casting() ~= "NULL" then
     castingText = netbot.Casting()
   end
-  o.Casting = HUDItem:new(castingText, 120, Yellow)
+  o.Casting = HUDItem:new(castingText, Yellow)
   return o
 end
 
@@ -192,81 +190,112 @@ local openGUI = true
 local shouldDrawGUI = true
 local terminate = false
 local windowFlags = bit32.bor(ImGuiWindowFlags.NoDecoration, ImGuiWindowFlags.NoDocking, ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoSavedSettings, ImGuiWindowFlags.NoFocusOnAppearing, ImGuiWindowFlags.NoNav)
-
-local function PushStyleCompact()
-  local style = ImGui.GetStyle()
-  ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, ImVec2.new(style.FramePadding.x, style.FramePadding.y * 0.70))
-  ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ImVec2.new(style.ItemSpacing.x, style.ItemSpacing.y * 0.70))
-end
-
-local function PopStyleCompact()
-    ImGui.PopStyleVar(2)
-end
+local tableFlags = bit32.bor(ImGuiTableFlags.PadOuterX)
 
 ---@param hudItem HUDItem
----@param xStart? integer
-local function renderItem(hudItem, xStart)
+local function renderItem(hudItem)
+  ImGui.PushStyleVar(ImGuiStyleVar.ItemInnerSpacing, 2, 2)
   if hudItem.Text == "" then
-    return xStart + hudItem.Size
+    ImGui.Text("")
+    return
   end
 
-  local x = xStart or 0
-  if x ~= 0 then
-    ImGui.SameLine(x)
-  end
   ImGui.PushStyleColor(ImGuiCol.Text, hudItem.Color:Unpack())
   ImGui.Text(hudItem.Text)
   ImGui.PopStyleColor(1)
-  return x + hudItem.Size
+  ImGui.PopStyleVar(1)
 end
 
-local function renderHutBut(hudBot)
-  local xStart = renderItem(hudBot.Name)
-  xStart = renderItem(hudBot.Level, xStart)
-  xStart = renderItem(hudBot.PctHP, xStart)
-  xStart = renderItem(hudBot.PctMana, xStart)
-  xStart = renderItem(hudBot.XP, xStart)
-  xStart = renderItem(hudBot.Distance, xStart)
-  xStart = renderItem(hudBot.Target, xStart)
-  xStart = renderItem(hudBot.Pet, xStart)
-  xStart = renderItem(hudBot.Casting, xStart)
+local function renderHutBot(hudBot)
+  ImGui.TableNextColumn()
+  renderItem(hudBot.Name)
+  ImGui.TableNextColumn()
+  renderItem(hudBot.Level)
+  ImGui.TableNextColumn()
+  renderItem(hudBot.PctHP)
+  ImGui.TableNextColumn()
+  renderItem(hudBot.PctMana)
+  ImGui.TableNextColumn()
+  renderItem(hudBot.XP)
+  ImGui.TableNextColumn()
+  renderItem(hudBot.Distance)
+  ImGui.TableNextColumn()
+  renderItem(hudBot.Target)
+  ImGui.TableNextColumn()
+  renderItem(hudBot.Pet)
+  ImGui.TableNextColumn()
+  renderItem(hudBot.Casting)
 end
+
+local function PushStyleCompact()
+  local style = ImGui.GetStyle()
+  ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, 0, 0)
+end
+
+local function PopStyleCompact()
+  ImGui.PopStyleVar(1)
+end
+
+local ColumnID_Name = 0
+local ColumnID_Level = 1
+local ColumnID_HP = 2
+local ColumnID_MP = 3
+local ColumnID_XP = 4
+local ColumnID_Distance = 5
+local ColumnID_Target = 6
+local ColumnID_Pet = 7
+local ColumnID_Casting = 8
 
 -- ImGui main function for rendering the UI window
 local hud = function()
   local renderSpacing = false
   ImGui.SetNextWindowBgAlpha(.3)
+  PushStyleCompact()
   openGUI, shouldDrawGUI = ImGui.Begin('HUD', openGUI, windowFlags)
+  ImGui.SetWindowSize(430, 277)
   if shouldDrawGUI then
-    PushStyleCompact()
     ImGui.SetWindowFontScale(.9)
+    if ImGui.BeginTable('hud_table', 9, tableFlags) then
+      ImGui.TableSetupColumn('Name', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Name)
+      ImGui.TableSetupColumn('Lvl', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Level)
+      ImGui.TableSetupColumn('HP', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_HP)
+      ImGui.TableSetupColumn('MP', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_MP)
+      ImGui.TableSetupColumn('XP', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_XP)
+      ImGui.TableSetupColumn('Dist', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Distance)
+      ImGui.TableSetupColumn('Tar', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Target)
+      ImGui.TableSetupColumn('Pet', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Pet)
+      ImGui.TableSetupColumn('Cast', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Casting)
+    end
+
+    ImGui.TableHeadersRow()
+
     if useGroupLayoutMode then
       for i=1,#groupLayoutMode do
         for k,v in pairs(groupLayoutMode[i]) do
           local hudBot = hudData[v]
           if hudBot then
             if renderSpacing then
-              ImGui.Spacing()
-              ImGui.Spacing()
+              ImGui.TableNextRow()
               renderSpacing = false
             end
-            
-            renderHutBut(hudBot)
+
+            renderHutBot(hudBot)
           end
         end
-        
+
         renderSpacing = true
       end
     else
       for i=1,#hudData do
         local hudBot = hudData[i]
-        renderHutBut(hudBot)
+        renderHutBot(hudBot)
       end
     end
-        
-    PopStyleCompact()
+
+    ImGui.EndTable()
   end
   ImGui.End()
+  PopStyleCompact()
   if not openGUI then
       terminate = true
   end
@@ -283,7 +312,7 @@ local function createDefaultSortedData()
     -- logger.Info("HUD %d %s %s %s", i, name, netbot.Name(), hudBot.Name.Text)
     table.insert(newData, hudBot)
   end
-  
+
   return newData
 end
 
@@ -296,7 +325,7 @@ local function createGroupLayoutData()
     -- logger.Info("HUD %d %s %s %s", i, name, netbot.Name(), hudBot.Name.Text)
     newData[name] = hudBot
   end
-  
+
   return newData
 end
 
