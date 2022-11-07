@@ -190,7 +190,8 @@ local openGUI = true
 local shouldDrawGUI = true
 local terminate = false
 local windowFlags = bit32.bor(ImGuiWindowFlags.NoDecoration, ImGuiWindowFlags.NoDocking, ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoSavedSettings, ImGuiWindowFlags.NoFocusOnAppearing, ImGuiWindowFlags.NoNav)
-local tableFlags = bit32.bor(ImGuiTableFlags.PadOuterX)
+local windowFlagsLock = bit32.bor(windowFlags, ImGuiWindowFlags.NoMove)
+local tableFlags = bit32.bor(ImGuiTableFlags.PadOuterX, ImGuiTableFlags.Hideable)
 
 ---@param hudItem HUDItem
 local function renderItem(hudItem)
@@ -246,12 +247,19 @@ local ColumnID_Target = 6
 local ColumnID_Pet = 7
 local ColumnID_Casting = 8
 
+local HUDLocked = false
+local checkBoxPressed = false
+
 -- ImGui main function for rendering the UI window
 local hud = function()
   local renderSpacing = false
   ImGui.SetNextWindowBgAlpha(.3)
   PushStyleCompact()
-  openGUI, shouldDrawGUI = ImGui.Begin('HUD', openGUI, windowFlags)
+  if HUDLocked then
+    openGUI, shouldDrawGUI = ImGui.Begin('HUD', openGUI, windowFlagsLock)
+  else
+    openGUI, shouldDrawGUI = ImGui.Begin('HUD', openGUI, windowFlags)
+  end
   ImGui.SetWindowSize(430, 277)
   if shouldDrawGUI then
     ImGui.SetWindowFontScale(.9)
@@ -276,6 +284,8 @@ local hud = function()
           if hudBot then
             if renderSpacing then
               ImGui.TableNextRow()
+              ImGui.TableNextRow()
+              ImGui.TableNextRow()
               renderSpacing = false
             end
 
@@ -290,6 +300,21 @@ local hud = function()
         local hudBot = hudData[i]
         renderHutBot(hudBot)
       end
+    end
+
+    for column=0,9 do
+      ImGui.PushID(column)
+      if ImGui.TableGetHoveredColumn() > 0 and ImGui.IsMouseReleased(1) then
+        ImGui.OpenPopup("TablePopup", ImGuiPopupFlags.NoOpenOverExistingPopup)
+      end
+      if ImGui.BeginPopup("TablePopup") then
+        HUDLocked, checkBoxPressed = ImGui.Checkbox("Lock HUD", HUDLocked)
+        if checkBoxPressed then
+          ImGui.CloseCurrentPopup()
+        end
+        ImGui.EndPopup()
+      end
+      ImGui.PopID()
     end
 
     ImGui.EndTable()
