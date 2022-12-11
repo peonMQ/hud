@@ -2,7 +2,6 @@
 local mq = require 'mq'
 local configuration = require('utils/configloader')
 local logger = require 'utils/logging'
-local luautil = require 'utils/lua'
 --- @type ImGui
 require 'ImGui'
 
