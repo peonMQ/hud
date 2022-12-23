@@ -25,19 +25,17 @@ jobs:
         $releaseDir = $env:PROJECT + "\"
         $Directories = Get-ChildItem -Directory "." -Exclude $excludeDirs 
 
-        function CopyReleaseContents($parentDir, $directories){
+        function CopyReleaseContents($parentDir, $directories) {
+          foreach($dir in $directories) {
+            $currentDir = ($parentDir + $dir.Name + "\")
+            $childReleaseDir = ($releaseDir + $currentDir)
+            New-Item -Path $childReleaseDir -ItemType Directory
+            Copy ($currentDir + "*.lua") $childReleaseDir 
 
-            foreach($dir in $directories) {
-                $currentDir = ($parentDir + $dir.Name + "\")
-                $childReleaseDir = ($releaseDir + $currentDir)
-                New-Item -Path $childReleaseDir -ItemType Directory
-                Copy ($currentDir + "*.lua") $childReleaseDir 
 
-
-                $ChildDirectories = Get-ChildItem -Directory $dir.Name 
-                CopyReleaseContents ($currentDir+"\") $ChildDirectories
-
-            }
+            $ChildDirectories = Get-ChildItem -Directory $currentDir 
+            CopyReleaseContents ($currentDir+"\") $ChildDirectories
+          }
         }
 
         New-Item -Path $releaseDir -ItemType Directory
