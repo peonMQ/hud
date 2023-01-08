@@ -62,13 +62,15 @@ end
 ---@param percentage integer
 ---@return Color
 function ColorTransition:ByPercent(percentage)
-  if percentage == "NULL"  then
+  local percent = tonumber(percentage)
+  if not percent then
     return self.Max
   end
 
-  local newRed = self.Max.R + ((self.Min.R - self.Max.R) * (100-percentage)/100);
-	local newGreen = self.Max.G + ((self.Min.G - self.Max.G) * (100-percentage)/100);
-	local newBlue = self.Max.B + ((self.Min.B - self.Max.B) * (100-percentage)/100);
+  percent = math.min(100, math.max(percentage, 0))
+  local newRed = self.Max.R + ((self.Min.R - self.Max.R) * (100-percent)/100);
+	local newGreen = self.Max.G + ((self.Min.G - self.Max.G) * (100-percent)/100);
+	local newBlue = self.Max.B + ((self.Min.B - self.Max.B) * (100-percent)/100);
   return Color:new(newRed, newGreen, newBlue);
 end
 
@@ -155,6 +157,7 @@ function HUDBot:new (netbot)
   o.Distance = HUDItem:new(distanceText, distanceColor)
 
   local targetText = ""
+  local targetColor = White
   if netbot.TargetID() then
     local spawn = mq.TLO.Spawn(netbot.TargetID())
     if spawn() then
@@ -163,9 +166,14 @@ function HUDBot:new (netbot)
         targetName = string.sub(targetName, 0, 18)..".."
       end
       targetText = targetName
+
+      if spawn.Type() == "NPC" then
+        targetColor = Green
+      end
     end
   end
-  o.Target = HUDItem:new(targetText, BloodOrange)
+  
+  o.Target = HUDItem:new(targetText, targetColor)
 
   local petText = ""
   if netbot.PetID() ~= "NULL"and netbot.PetID() > 0 then
@@ -333,7 +341,6 @@ local function createDefaultSortedData()
     local name = mq.TLO.NetBots.Client(i)()
     local netbot = mq.TLO.NetBots(name) --[[@as netbot]]
     local hudBot = HUDBot:new(netbot)
-    -- logger.Info("HUD %d %s %s %s", i, name, netbot.Name(), hudBot.Name.Text)
     table.insert(newData, hudBot)
   end
 
@@ -346,7 +353,6 @@ local function createGroupLayoutData()
     local name = mq.TLO.NetBots.Client(i)()
     local netbot = mq.TLO.NetBots(name) --[[@as netbot]]
     local hudBot = HUDBot:new(netbot)
-    -- logger.Info("HUD %d %s %s %s", i, name, netbot.Name(), hudBot.Name.Text)
     newData[name] = hudBot
   end
 
