@@ -1,9 +1,7 @@
---- @type Mq
 local mq = require 'mq'
+local imgui = require 'ImGui'
 local configuration = require('utils/configloader')
 local logger = require 'utils/logging'
---- @type ImGui
-require 'ImGui'
 
 local groupLayoutMode = configuration("grouplayout", nil, "data/HUD") or {}
 local useGroupLayoutMode = next(groupLayoutMode)
@@ -202,46 +200,46 @@ local tableFlags = bit32.bor(ImGuiTableFlags.PadOuterX, ImGuiTableFlags.Hideable
 
 ---@param hudItem HUDItem
 local function renderItem(hudItem)
-  ImGui.PushStyleVar(ImGuiStyleVar.ItemInnerSpacing, 2, 2)
+  imgui.PushStyleVar(ImGuiStyleVar.ItemInnerSpacing, 2, 2)
   if hudItem.Text == "" then
-    ImGui.Text("")
+    imgui.Text("")
     return
   end
 
-  ImGui.PushStyleColor(ImGuiCol.Text, hudItem.Color:Unpack())
-  ImGui.Text(hudItem.Text)
-  ImGui.PopStyleColor(1)
-  ImGui.PopStyleVar(1)
+  imgui.PushStyleColor(ImGuiCol.Text, hudItem.Color:Unpack())
+  imgui.Text(hudItem.Text)
+  imgui.PopStyleColor(1)
+  imgui.PopStyleVar(1)
 end
 
 local function renderHutBot(hudBot)
-  ImGui.TableNextColumn()
+  imgui.TableNextColumn()
   renderItem(hudBot.Name)
-  ImGui.TableNextColumn()
+  imgui.TableNextColumn()
   renderItem(hudBot.Level)
-  ImGui.TableNextColumn()
+  imgui.TableNextColumn()
   renderItem(hudBot.PctHP)
-  ImGui.TableNextColumn()
+  imgui.TableNextColumn()
   renderItem(hudBot.PctMana)
-  ImGui.TableNextColumn()
+  imgui.TableNextColumn()
   renderItem(hudBot.XP)
-  ImGui.TableNextColumn()
+  imgui.TableNextColumn()
   renderItem(hudBot.Distance)
-  ImGui.TableNextColumn()
+  imgui.TableNextColumn()
   renderItem(hudBot.Target)
-  ImGui.TableNextColumn()
+  imgui.TableNextColumn()
   renderItem(hudBot.Pet)
-  ImGui.TableNextColumn()
+  imgui.TableNextColumn()
   renderItem(hudBot.Casting)
 end
 
 local function PushStyleCompact()
-  local style = ImGui.GetStyle()
-  ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, 0, 0)
+  local style = imgui.GetStyle()
+  imgui.PushStyleVar(ImGuiStyleVar.WindowPadding, 0, 0)
 end
 
 local function PopStyleCompact()
-  ImGui.PopStyleVar(1)
+  imgui.PopStyleVar(1)
 end
 
 local ColumnID_Name = 0
@@ -260,29 +258,29 @@ local checkBoxPressed = false
 -- ImGui main function for rendering the UI window
 local hud = function()
   local renderSpacing = false
-  ImGui.SetNextWindowBgAlpha(.3)
+  imgui.SetNextWindowBgAlpha(.3)
   PushStyleCompact()
   if HUDLocked then
-    openGUI, shouldDrawGUI = ImGui.Begin('HUD', openGUI, windowFlagsLock)
+    openGUI, shouldDrawGUI = imgui.Begin('HUD', openGUI, windowFlagsLock)
   else
-    openGUI, shouldDrawGUI = ImGui.Begin('HUD', openGUI, windowFlags)
+    openGUI, shouldDrawGUI = imgui.Begin('HUD', openGUI, windowFlags)
   end
-  ImGui.SetWindowSize(430, 277)
+  imgui.SetWindowSize(430, 277)
   if shouldDrawGUI then
-    ImGui.SetWindowFontScale(.9)
-    if ImGui.BeginTable('hud_table', 9, tableFlags) then
-      ImGui.TableSetupColumn('Name', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Name)
-      ImGui.TableSetupColumn('Lvl', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Level)
-      ImGui.TableSetupColumn('HP', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_HP)
-      ImGui.TableSetupColumn('MP', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_MP)
-      ImGui.TableSetupColumn('XP', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_XP)
-      ImGui.TableSetupColumn('Dist', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Distance)
-      ImGui.TableSetupColumn('Tar', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Target)
-      ImGui.TableSetupColumn('Pet', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Pet)
-      ImGui.TableSetupColumn('Cast', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Casting)
+    imgui.SetWindowFontScale(.9)
+    if imgui.BeginTable('hud_table', 9, tableFlags) then
+      imgui.TableSetupColumn('Name', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Name)
+      imgui.TableSetupColumn('Lvl', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Level)
+      imgui.TableSetupColumn('HP', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_HP)
+      imgui.TableSetupColumn('MP', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_MP)
+      imgui.TableSetupColumn('XP', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_XP)
+      imgui.TableSetupColumn('Dist', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Distance)
+      imgui.TableSetupColumn('Tar', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Target)
+      imgui.TableSetupColumn('Pet', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Pet)
+      imgui.TableSetupColumn('Cast', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Casting)
     end
 
-    ImGui.TableHeadersRow()
+    imgui.TableHeadersRow()
 
     if useGroupLayoutMode then
       for i=1,#groupLayoutMode do
@@ -290,9 +288,9 @@ local hud = function()
           local hudBot = hudData[v]
           if hudBot then
             if renderSpacing then
-              ImGui.TableNextRow()
-              ImGui.TableNextRow()
-              ImGui.TableNextRow()
+              imgui.TableNextRow()
+              imgui.TableNextRow()
+              imgui.TableNextRow()
               renderSpacing = false
             end
 
@@ -310,23 +308,23 @@ local hud = function()
     end
 
     for column=0,9 do
-      ImGui.PushID(column)
-      if ImGui.TableGetHoveredColumn() > 0 and ImGui.IsMouseReleased(1) then
-        ImGui.OpenPopup("TablePopup", ImGuiPopupFlags.NoOpenOverExistingPopup)
+      imgui.PushID(column)
+      if imgui.TableGetHoveredColumn() > 0 and imgui.IsMouseReleased(1) then
+        imgui.OpenPopup("TablePopup", ImGuiPopupFlags.NoOpenOverExistingPopup)
       end
-      if ImGui.BeginPopup("TablePopup") then
-        HUDLocked, checkBoxPressed = ImGui.Checkbox("Lock HUD", HUDLocked)
+      if imgui.BeginPopup("TablePopup") then
+        HUDLocked, checkBoxPressed = imgui.Checkbox("Lock HUD", HUDLocked)
         if checkBoxPressed then
-          ImGui.CloseCurrentPopup()
+          imgui.CloseCurrentPopup()
         end
-        ImGui.EndPopup()
+        imgui.EndPopup()
       end
-      ImGui.PopID()
+      imgui.PopID()
     end
 
-    ImGui.EndTable()
+    imgui.EndTable()
   end
-  ImGui.End()
+  imgui.End()
   PopStyleCompact()
   if not openGUI then
       terminate = true
