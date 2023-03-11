@@ -265,6 +265,7 @@ local hud = function()
   else
     openGUI, shouldDrawGUI = imgui.Begin('HUD', openGUI, windowFlags)
   end
+  PopStyleCompact()
   imgui.SetWindowSize(430, 277)
   if shouldDrawGUI then
     imgui.SetWindowFontScale(.9)
@@ -325,7 +326,6 @@ local hud = function()
     imgui.EndTable()
   end
   imgui.End()
-  PopStyleCompact()
   if not openGUI then
       terminate = true
   end
