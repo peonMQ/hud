@@ -114,7 +114,7 @@ end
 ---@field public Target HUDItem
 ---@field public Casting HUDItem
 ---@field public Pet HUDItem
-local HUDBot = {Name=HUDItem, Level=HUDItem, PctHP=HUDItem, PctMana=HUDItem, XP=HUDItem, Distance=HUDItem, Target=HUDItem, Casting=HUDItem, NamPete=HUDItem}
+local HUDBot = {Name=HUDItem, Level=HUDItem, PctHP=HUDItem, PctMana=HUDItem, XP=HUDItem, Distance=HUDItem, Target=HUDItem, Casting=HUDItem, Pet=HUDItem, PIDs=HUDItem}
 
 ---@param netbot netbot
 ---@return HUDBot
@@ -170,7 +170,7 @@ function HUDBot:new (netbot)
       end
     end
   end
-  
+
   o.Target = HUDItem:new(targetText, targetColor)
 
   local petText = ""
@@ -184,6 +184,12 @@ function HUDBot:new (netbot)
     castingText = netbot.Casting()
   end
   o.Casting = HUDItem:new(castingText, Yellow)
+
+  local pidsText = ""
+  if netbot.Note() ~= "NULL" then
+    pidsText = netbot.Note()
+  end
+  o.PIDs = HUDItem:new(pidsText, White)
   return o
 end
 
@@ -231,6 +237,8 @@ local function renderHutBot(hudBot)
   renderItem(hudBot.Pet)
   imgui.TableNextColumn()
   renderItem(hudBot.Casting)
+  imgui.TableNextColumn()
+  renderItem(hudBot.PIDs)
 end
 
 local function PushStyleCompact()
@@ -251,6 +259,7 @@ local ColumnID_Distance = 5
 local ColumnID_Target = 6
 local ColumnID_Pet = 7
 local ColumnID_Casting = 8
+local ColumnID_PIDs = 9
 
 local HUDLocked = false
 local checkBoxPressed = false
@@ -269,7 +278,7 @@ local hud = function()
   imgui.SetWindowSize(430, 277)
   if shouldDrawGUI then
     imgui.SetWindowFontScale(.9)
-    if imgui.BeginTable('hud_table', 9, tableFlags) then
+    if imgui.BeginTable('hud_table', 10, tableFlags) then
       imgui.TableSetupColumn('Name', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Name)
       imgui.TableSetupColumn('Lvl', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Level)
       imgui.TableSetupColumn('HP', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_HP)
@@ -279,6 +288,7 @@ local hud = function()
       imgui.TableSetupColumn('Tar', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Target)
       imgui.TableSetupColumn('Pet', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Pet)
       imgui.TableSetupColumn('Cast', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Casting)
+      imgui.TableSetupColumn('PIDs', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_PIDs)
     end
 
     imgui.TableHeadersRow()
