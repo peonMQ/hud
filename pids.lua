@@ -1,8 +1,8 @@
 --- @type Mq
-local mq = require('mq')
-local logger = require('utils/logging')
-local debugutils = require('utils/debug')
-local luaUtils = require('utils/lua-table')
+local mq = require 'mq'
+local logger = require 'utils/logging'
+local debugutils = require 'utils/debug'
+local luaUtils = require 'utils/lua-table'
 
 while true do
   local pids = luaUtils.Split(mq.TLO.Lua.PIDs(), ",")

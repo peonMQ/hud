@@ -1,6 +1,6 @@
 local mq = require 'mq'
 local imgui = require 'ImGui'
-local configuration = require('utils/configloader')
+local configuration = require 'utils/configloader'
 local logger = require 'utils/logging'
 
 local groupLayoutMode = configuration("grouplayout", nil, "data/HUD") or {}
