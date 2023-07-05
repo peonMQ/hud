@@ -19,6 +19,9 @@ while true do
   end
 
   local pidNames = table.concat(scriptNames,";")
+  if pidNames:len() > 200 then
+    pidNames = pidNames:sub(1, 198).."++";
+  end
   mq.cmdf("/netnote %s", pidNames)
   mq.delay(6000)
 end
