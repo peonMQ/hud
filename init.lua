@@ -109,12 +109,11 @@ local hud = function()
 
     imgui.TableHeadersRow()
 
-    if not useGroupLayoutMode then
+    if useGroupLayoutMode then
       for i=1,#groupLayoutMode do
         for k,v in pairs(groupLayoutMode[i]) do
           local hudBot = hudData[v]
           if hudBot then
-            print(v, hudBot.Name())
             if renderSpacing then
               imgui.TableNextRow()
               imgui.TableNextRow()
