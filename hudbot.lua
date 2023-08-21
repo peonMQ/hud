@@ -1,3 +1,4 @@
+local mq = require 'mq'
 
 -- https://jsfiddle.net/dkLec6xs/
 --[[
@@ -29,15 +30,14 @@ function Color:new (r, g, b, a)
   return o
 end
 
----@return number, number, number, number
+---@return ImVec4
 function Color:Unpack()
-  return self.R, self.G, self.B, self.A
+  return ImVec4(self.R, self.G, self.B, self.A)
 end
 
 ---@class ColorTransition
 ---@field public Max Color
 ---@field public Min Color
----@field public Color Color
 local ColorTransition = {Max = Color, Min = Color}
 
 ---@param max Color
@@ -48,23 +48,22 @@ function ColorTransition:new (max, min)
   local o = setmetatable({}, self)
   o.Max = max or Color
   o.Min = min or Color
-  o.Color = o.Max
   return o
 end
 
 ---@param percentage integer
----@return Color
+---@return ImVec4
 function ColorTransition:ByPercent(percentage)
   local percent = tonumber(percentage)
   if not percent then
-    return self.Max
+    return self.Max:Unpack()
   end
 
   percent = math.min(100, math.max(percentage, 0))
-  self.Color.R = self.Max.R + ((self.Min.R - self.Max.R) * (100-percent)/100);
-	self.Color.G = self.Max.G + ((self.Min.G - self.Max.G) * (100-percent)/100);
-	self.Color.B = self.Max.B + ((self.Min.B - self.Max.B) * (100-percent)/100);
-  return self.Color;
+  local newRed = self.Max.R + ((self.Min.R - self.Max.R) * (100-percent)/100);
+	local newGreen = self.Max.G + ((self.Min.G - self.Max.G) * (100-percent)/100);
+	local newBlue = self.Max.B + ((self.Min.B - self.Max.B) * (100-percent)/100);
+  return ImVec4(newRed, newGreen, newBlue, 1);
 end
 
 local White = Color:new(1, 1, 1)
@@ -84,13 +83,14 @@ local distTransition = ColorTransition:new(DarkCyan, Orange)
 
 ---@class HUDItem
 ---@field public Text string
----@field public Color Color
+---@field public Color ImVec4
+local HUDItem = {Text="", Color = White:Unpack()}
 
 ---@param text string
----@param color? Color
+---@param color? ImVec4
 ---@return HUDItem
 local function newHUDItem (text, color)
-  return { Text = text or "NA", Color = color or White };
+  return { Text = text or "NA", Color = color or White:Unpack() };
 end
 
 ---@param netbot netbot
@@ -120,10 +120,10 @@ end
 ---@param netbot netbot
 local function pctExp(netbot)
   if netbot.PctExp() ~= "NULL" and netbot.PctExp() < 100 then
-    return newHUDItem(string.format("%.2f", netbot.PctExp()).."%", PastelGreen)
+    return newHUDItem(string.format("%.2f", netbot.PctExp()).."%", PastelGreen:Unpack())
   end
 
-  return newHUDItem("-", PastelGreen)
+  return newHUDItem("-", PastelGreen:Unpack())
 end
 
 ---@param netbot netbot
@@ -140,7 +140,7 @@ local function distance(netbot)
       distanceText = string.format(distanceText, string.format("%.2f", spawnDistance))
     end
   else
-    distanceColor = Orange
+    distanceColor = Orange:Unpack()
     distanceText = string.format(distanceText, mq.TLO.Zone(netbot.Zone()).ShortName())
   end
 
@@ -166,7 +166,7 @@ local function target(netbot)
     end
   end
 
-  return newHUDItem(targetText, targetColor)
+  return newHUDItem(targetText, targetColor:Unpack())
 end
 
 ---@param netbot netbot
@@ -185,7 +185,7 @@ local function casting(netbot)
     castingText = netbot.Casting()
   end
 
-  return newHUDItem(castingText, Yellow)
+  return newHUDItem(castingText, Yellow:Unpack())
 end
 
 ---@param netbot netbot
@@ -194,18 +194,52 @@ local function pids(netbot)
   if netbot.Note() ~= "NULL" then
     pidsText = netbot.Note()
   end
-  return newHUDItem(pidsText, White)
+  return newHUDItem(pidsText, White:Unpack())
 end
 
-return {
-  Name = name,
-  Level = level,
-  PctHP = pctHP,
-  PctMana = pctMana,
-  PctExp = pctExp,
-  Distance = distance,
-  Target = target,
-  Pet = pet,
-  Casting = casting,
-  PIDs = pids,
-}
+
+---@class HUDBot
+---@field public Name HUDItem
+---@field public Level HUDItem
+---@field public PctHP HUDItem
+---@field public PctMana HUDItem
+---@field public PctExp HUDItem
+---@field public Distance HUDItem
+---@field public Target HUDItem
+---@field public Casting HUDItem
+---@field public Pet HUDItem
+local HUDBot = {Name=HUDItem, Level=HUDItem, PctHP=HUDItem, PctMana=HUDItem, PctExp=HUDItem, Distance=HUDItem, Target=HUDItem, Casting=HUDItem, Pet=HUDItem, PIDs=HUDItem}
+
+---@param netbot netbot
+---@return HUDBot
+function HUDBot:New (netbot)
+  self.__index = self
+  local o = setmetatable({}, self)
+  o.Name = name(netbot)
+  o.Level = level(netbot)
+  o.PctHP = pctHP(netbot)
+  o.PctMana = pctMana(netbot)
+  o.PctExp = pctExp(netbot)
+  o.Distance = distance(netbot)
+  o.Target = target(netbot)
+  o.Pet = pet(netbot)
+  o.Casting = casting(netbot)
+  o.PIDs = pids(netbot)
+  return o
+end
+
+---@param netbot netbot
+function HUDBot:Update (netbot)
+  self.Name = name(netbot)
+  self.Level = level(netbot)
+  self.PctHP = pctHP(netbot)
+  self.PctMana = pctMana(netbot)
+  self.PctExp = pctExp(netbot)
+  self.Distance = distance(netbot)
+  self.Target = target(netbot)
+  self.Pet = pet(netbot)
+  self.Casting = casting(netbot)
+  self.PIDs = pids(netbot)
+end
+
+return HUDBot

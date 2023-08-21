@@ -8,7 +8,7 @@ local generalSettings = configuration("general", {scale = 1.0}, "data/HUD")
 local groupLayoutMode = configuration("grouplayout", nil, "data/HUD") or {}
 local useGroupLayoutMode = next(groupLayoutMode)
 
----@type netbot[]
+---@type HUDBot[]
 local hudData = {}
 
 -- GUI Control variables
@@ -27,34 +27,34 @@ local function renderItem(hudItem)
     return
   end
 
-  imgui.PushStyleColor(ImGuiCol.Text, hudItem.Color:Unpack())
+  imgui.PushStyleColor(ImGuiCol.Text, hudItem.Color)
   imgui.Text(hudItem.Text)
   imgui.PopStyleColor(1)
   imgui.PopStyleVar(1)
 end
 
----@param netbot netbot
-local function renderHutBot(netbot)
+---@param hudBot HUDBot
+local function renderHutBot(hudBot)
   imgui.TableNextColumn()
-  renderItem(hudBot.Name(netbot))
+  renderItem(hudBot.Name)
   imgui.TableNextColumn()
-  renderItem(hudBot.Level(netbot))
+  renderItem(hudBot.Level)
   imgui.TableNextColumn()
-  renderItem(hudBot.PctHP(netbot))
+  renderItem(hudBot.PctHP)
   imgui.TableNextColumn()
-  renderItem(hudBot.PctMana(netbot))
+  renderItem(hudBot.PctMana)
   imgui.TableNextColumn()
-  renderItem(hudBot.XP(netbot))
+  renderItem(hudBot.PctExp)
   imgui.TableNextColumn()
-  renderItem(hudBot.Distance(netbot))
+  renderItem(hudBot.Distance)
   imgui.TableNextColumn()
-  renderItem(hudBot.Target(netbot))
+  renderItem(hudBot.Target)
   imgui.TableNextColumn()
-  renderItem(hudBot.Pet(netbot))
+  renderItem(hudBot.Pet)
   imgui.TableNextColumn()
-  renderItem(hudBot.Casting(netbot))
+  renderItem(hudBot.Casting)
   imgui.TableNextColumn()
-  renderItem(hudBot.PIDs(netbot))
+  renderItem(hudBot.PIDs)
 end
 
 local function PushStyleCompact()
@@ -109,11 +109,12 @@ local hud = function()
 
     imgui.TableHeadersRow()
 
-    if useGroupLayoutMode then
+    if not useGroupLayoutMode then
       for i=1,#groupLayoutMode do
         for k,v in pairs(groupLayoutMode[i]) do
-          local netbot = hudData[v]
-          if netbot then
+          local hudBot = hudData[v]
+          if hudBot then
+            print(v, hudBot.Name())
             if renderSpacing then
               imgui.TableNextRow()
               imgui.TableNextRow()
@@ -121,7 +122,7 @@ local hud = function()
               renderSpacing = false
             end
 
-            renderHutBot(netbot)
+            renderHutBot(hudBot)
           end
         end
 
@@ -163,7 +164,9 @@ local function udpateHudData()
     local name = mq.TLO.NetBots.Client(i)()
     local netbot = mq.TLO.NetBots(name) --[[@as netbot]]
     if not hudData[name] then
-      hudData[name] = netbot
+      hudData[name] = hudBot:New(netbot)
+    else
+      hudData[name]:Update(netbot)
     end
   end
 end
