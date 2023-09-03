@@ -160,7 +160,8 @@ mq.imgui.init('hud', hud)
 
 local function udpateHudData()
   for name, _ in pairs(hudData) do
-    if not mq.TLO.NetBots(name).ID() then
+    if mq.TLO.NetBots(name).ID() == "NULL" then
+      logger.Warn("NetBot %s not found, removing from HUD...", name)
       hudData[name] = nil
     end
   end
