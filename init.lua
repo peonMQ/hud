@@ -8,7 +8,7 @@ local generalSettings = configuration("general", {scale = 1.0}, "data/HUD")
 local groupLayoutMode = configuration("grouplayout", nil, "data/HUD") or {}
 local useGroupLayoutMode = next(groupLayoutMode)
 
----@type HUDBot[]
+---@type table<string, HUDBot>
 local hudData = {}
 
 -- GUI Control variables
@@ -112,8 +112,8 @@ local hud = function()
     if useGroupLayoutMode then
       for i=1,#groupLayoutMode do
         for k,v in pairs(groupLayoutMode[i]) do
-          local hudBot = hudData[v]
-          if hudBot then
+          local chrHudBot = hudData[v]
+          if chrHudBot then
             if renderSpacing then
               imgui.TableNextRow()
               imgui.TableNextRow()
@@ -121,7 +121,7 @@ local hud = function()
               renderSpacing = false
             end
 
-            renderHutBot(hudBot)
+            renderHutBot(chrHudBot)
           end
         end
 
@@ -159,6 +159,12 @@ end
 mq.imgui.init('hud', hud)
 
 local function udpateHudData()
+  for name, _ in pairs(hudData) do
+    if not mq.TLO.NetBots(name).ID() then
+      hudData[name] = nil
+    end
+  end
+
   for i=1,mq.TLO.NetBots.Counts() do
     local name = mq.TLO.NetBots.Client(i)()
     local netbot = mq.TLO.NetBots(name) --[[@as netbot]]
