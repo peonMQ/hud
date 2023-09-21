@@ -34,7 +34,7 @@ Default log level: `warn`
 ```
 
 ### Group sorter order in UI
-User/character configs are located at `{MQConfigDir}\{ServerName}\{CharacterName}.json`
+HUD configs are located at `{MQConfigDir}\{ServerShortName}\data\HUD.json`
 Each list is one group, which gets sorted in HUD and spaced out.
 ```json
 {
