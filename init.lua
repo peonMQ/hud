@@ -168,11 +168,15 @@ local function udpateHudData()
 
   for i=1,mq.TLO.NetBots.Counts() do
     local name = mq.TLO.NetBots.Client(i)()
-    local netbot = mq.TLO.NetBots(name) --[[@as netbot]]
-    if not hudData[name] then
-      hudData[name] = hudBot:New(netbot)
+    if name ~= "NULL" then
+      local netbot = mq.TLO.NetBots(name) --[[@as netbot]]
+      if not hudData[name] then
+        hudData[name] = hudBot:New(netbot)
+      else
+        hudData[name]:Update(netbot)
+      end
     else
-      hudData[name]:Update(netbot)
+      logger.Warn("NetBot <%s> is NULL, skipping...", i)
     end
   end
 end
