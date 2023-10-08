@@ -95,6 +95,18 @@ end
 
 ---@param netbot netbot
 local function name(netbot)
+  if netbot.Counters() ~= "NULL" and netbot.Counters() > 0 then
+    return newHUDItem(netbot.Name(), Red:Unpack())
+  end
+
+  if netbot.Raid() ~= "NULL" and netbot.Raid() then
+    return newHUDItem(netbot.Name(), Cyan:Unpack())
+  end
+
+  if netbot.Grouped() ~= "NULL" and netbot.Grouped() then
+    return newHUDItem(netbot.Name(), Green:Unpack())
+  end
+
   return newHUDItem(netbot.Name());
 end
 
@@ -141,7 +153,13 @@ local function distance(netbot)
     end
   else
     distanceColor = Orange:Unpack()
-    distanceText = string.format(distanceText, mq.TLO.Zone(netbot.Zone()).ShortName())
+    local instanceId = netbot.Instance()
+    if instanceId > 0 then
+      local text = string.format("%s[%d]", mq.TLO.Zone(netbot.Zone()).ShortName(), instanceId)
+      distanceText = string.format(distanceText, text)
+    else
+      distanceText = string.format(distanceText, mq.TLO.Zone(netbot.Zone()).ShortName())
+    end
   end
 
   return newHUDItem(distanceText, distanceColor)
