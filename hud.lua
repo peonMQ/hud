@@ -188,6 +188,13 @@ local function mainLoop()
   end
 end
 
+---@return boolean
+local function shouldTerminate()
+    return terminate
+end
+
 return {
-    MainLoop = mainLoop
+    MainLoop = mainLoop,
+    ShouldTerminate = shouldTerminate,
+    Update = udpateHudData,
 }
