@@ -1,16 +1,16 @@
 local mq = require 'mq'
-local configuration = require 'utils/configloader'
-local logger = require 'utils/logging'
+local logger = require 'knightlinc/Write'
+local settings = require 'settings'
 local hudInit = require 'hud'
 
-local generalSettings = configuration("general", {scale = 1.0}, "data/HUD")
-local groupLayoutMode = configuration("grouplayout", nil, "data/HUD") or {}
+logger.prefix = string.format("\at%s\ax", "[HUD]")
+logger.postfix = function () return string.format(" %s", os.date("%X")) end
 
+local generalSettings = settings.general or {scale = 1.0}
+local groupLayoutMode = settings.grouplayout or {}
 local hud = hudInit(generalSettings, groupLayoutMode)
 
-local function mainLoop()
-  while not hud.ShouldTerminate() do
-    hud.Update(logger)
-    mq.delay(500)
-  end
+while not hud.ShouldTerminate() do
+  hud.Update(logger)
+  mq.delay(500)
 end
