@@ -2,9 +2,10 @@ local mq = require 'mq'
 local imgui = require 'ImGui'
 local logger = require 'knightlinc/Write'
 local hudBot = require 'hudbot'
-
+local settingsUI = require 'ui/settings'
 
 local function init(settings, writeSettingsFile)
+  settingsUI.Init(settings, writeSettingsFile)
   ---@type table<string, HUDBot>
   local hudData = {}
 
@@ -136,34 +137,10 @@ local function init(settings, writeSettingsFile)
           imgui.OpenPopup("TablePopup", ImGuiPopupFlags.NoOpenOverExistingPopup)
         end
         if imgui.BeginPopup("TablePopup") then
-          settings.ui.locked, valueChanged = imgui.Checkbox("Lock HUD", settings.ui.locked)
-          if valueChanged then
-            if writeSettingsFile then
-              writeSettingsFile(settings)
-            end
+          imgui.Text("Settings")
+          if imgui.IsItemClicked(ImGuiMouseButton.Left) then
+            settingsUI.OpenSettings()
             imgui.CloseCurrentPopup()
-          end
-
-          settings.ui.layoutType, valueChanged = imgui.RadioButton("Name", settings.ui.layoutType, 1)
-          if valueChanged and writeSettingsFile then
-            writeSettingsFile(settings)
-          end
-          
-          if next(settings.groups) then
-            imgui.SameLine()
-            settings.ui.layoutType, valueChanged = imgui.RadioButton("Group", settings.ui.layoutType, 2)
-            if valueChanged and writeSettingsFile then
-              writeSettingsFile(settings)
-            end
-          end
-
-          settings.ui.opacity, valueChanged = imgui.SliderFloat("Opacity", settings.ui.opacity, 0.0, 1.0)
-          if valueChanged and writeSettingsFile then
-            writeSettingsFile(settings)
-          end
-          settings.ui.scale, valueChanged = imgui.SliderFloat("Scale", settings.ui.scale, 0.7, 1.3)
-          if valueChanged and writeSettingsFile then
-            writeSettingsFile(settings)
           end
           imgui.EndPopup()
         end

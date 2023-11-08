@@ -153,11 +153,17 @@ local function loadConfig (filePath)
   return f()
 end
 
+-- https://stackoverflow.com/questions/295052/how-can-i-determine-the-os-of-the-system-from-within-a-lua-script
+local pathSep = package.config:sub(1,1)
 local configDir = mq.configDir
 local serverName = mq.TLO.MacroQuest.Server()
 local configFilePath = string.format("%s/%s/%s", configDir, serverName, "data/HUD.lua")
+if pathSep ~= "/" then
+  configFilePath = configFilePath:gsub("/", "\\")
+end
+
 if fileExists(configFilePath) then
-  logger.Info("Loading config from <%s>...", configFilePath)
+  logger.Info("Loading config from '%s'", configFilePath)
   local loadedSettings = loadConfig(configFilePath)
   settings = leftJoin(settings, loadedSettings)
 end
