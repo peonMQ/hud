@@ -1,10 +1,10 @@
 local mq = require 'mq'
 local imgui = require 'ImGui'
+local logger = require 'knightlinc/Write'
 local hudBot = require 'hudbot'
 
-local function init(generalSettings, groupLayoutMode)
-  local useGroupLayoutMode = next(groupLayoutMode)
 
+local function init(settings, writeSettingsFile)
   ---@type table<string, HUDBot>
   local hudData = {}
 
@@ -34,6 +34,9 @@ local function init(generalSettings, groupLayoutMode)
   local function renderHutBot(hudBot)
     imgui.TableNextColumn()
     renderItem(hudBot.Name)
+    if imgui.IsItemClicked(ImGuiMouseButton.Left) then
+      mq.cmdf("/mqtarget %s", hudBot.Name.Text)
+    end
     imgui.TableNextColumn()
     renderItem(hudBot.Level)
     imgui.TableNextColumn()
@@ -74,15 +77,13 @@ local function init(generalSettings, groupLayoutMode)
   local ColumnID_Casting = 8
   local ColumnID_PIDs = 9
 
-  local HUDLocked = false
-  local checkBoxPressed = false
+  local valueChanged = false
 
   -- ImGui main function for rendering the UI window
   local hud = function()
-    local renderSpacing = false
-    imgui.SetNextWindowBgAlpha(.3)
+    imgui.SetNextWindowBgAlpha(settings.ui.opacity)
     PushStyleCompact()
-    if HUDLocked then
+    if settings.ui.locked then
       openGUI, shouldDrawGUI = imgui.Begin('HUD', openGUI, windowFlagsLock)
     else
       openGUI, shouldDrawGUI = imgui.Begin('HUD', openGUI, windowFlags)
@@ -90,7 +91,7 @@ local function init(generalSettings, groupLayoutMode)
     PopStyleCompact()
     imgui.SetWindowSize(430, 277)
     if shouldDrawGUI then
-      imgui.SetWindowFontScale(generalSettings.scale)
+      imgui.SetWindowFontScale(settings.ui.scale)
       if imgui.BeginTable('hud_table', 10, tableFlags) then
         imgui.TableSetupColumn('Name', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Name)
         imgui.TableSetupColumn('Lvl', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Level)
@@ -106,23 +107,22 @@ local function init(generalSettings, groupLayoutMode)
 
       imgui.TableHeadersRow()
 
-      if useGroupLayoutMode then
-        for i=1,#groupLayoutMode do
-          for k,v in pairs(groupLayoutMode[i]) do
-            local chrHudBot = hudData[v]
-            if chrHudBot then
-              if renderSpacing then
+      if settings.ui.layoutType == 2 then
+        for i, groupNames in ipairs(settings.groups) do
+          local renderGroupSpacing = i > 1 and i < #settings.groups
+          for k,name in ipairs(groupNames) do
+            local hudBotData = hudData[name]
+            if hudBotData then
+              if renderGroupSpacing then
                 imgui.TableNextRow()
                 imgui.TableNextRow()
                 imgui.TableNextRow()
-                renderSpacing = false
               end
 
-              renderHutBot(chrHudBot)
+              renderHutBot(hudBotData)
+              renderGroupSpacing = false
             end
           end
-
-          renderSpacing = true
         end
       else
         for _, netbot in pairs(hudData) do
@@ -136,9 +136,34 @@ local function init(generalSettings, groupLayoutMode)
           imgui.OpenPopup("TablePopup", ImGuiPopupFlags.NoOpenOverExistingPopup)
         end
         if imgui.BeginPopup("TablePopup") then
-          HUDLocked, checkBoxPressed = imgui.Checkbox("Lock HUD", HUDLocked)
-          if checkBoxPressed then
+          settings.ui.locked, valueChanged = imgui.Checkbox("Lock HUD", settings.ui.locked)
+          if valueChanged then
+            if writeSettingsFile then
+              writeSettingsFile(settings)
+            end
             imgui.CloseCurrentPopup()
+          end
+
+          settings.ui.layoutType, valueChanged = imgui.RadioButton("Name", settings.ui.layoutType, 1)
+          if valueChanged and writeSettingsFile then
+            writeSettingsFile(settings)
+          end
+          
+          if next(settings.groups) then
+            imgui.SameLine()
+            settings.ui.layoutType, valueChanged = imgui.RadioButton("Group", settings.ui.layoutType, 2)
+            if valueChanged and writeSettingsFile then
+              writeSettingsFile(settings)
+            end
+          end
+
+          settings.ui.opacity, valueChanged = imgui.SliderFloat("Opacity", settings.ui.opacity, 0.0, 1.0)
+          if valueChanged and writeSettingsFile then
+            writeSettingsFile(settings)
+          end
+          settings.ui.scale, valueChanged = imgui.SliderFloat("Scale", settings.ui.scale, 0.7, 1.3)
+          if valueChanged and writeSettingsFile then
+            writeSettingsFile(settings)
           end
           imgui.EndPopup()
         end
@@ -157,7 +182,7 @@ local function init(generalSettings, groupLayoutMode)
 
   local function udpateHudData(logger)
     for name, _ in pairs(hudData) do
-      if mq.TLO.NetBots(name).ID() == "NULL" then
+      if not mq.TLO.NetBots(name).ID() then
         logger.Warn("NetBot %s not found, removing from HUD...", name)
         hudData[name] = nil
       end
@@ -165,7 +190,7 @@ local function init(generalSettings, groupLayoutMode)
 
     for i=1,mq.TLO.NetBots.Counts() do
       local name = mq.TLO.NetBots.Client(i)()
-      if name ~= "NULL" then
+      if name and name ~= "NULL" then
         local netbot = mq.TLO.NetBots(name) --[[@as netbot]]
         if not hudData[name] then
           hudData[name] = hudBot:New(netbot)
