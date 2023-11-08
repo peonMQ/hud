@@ -4,10 +4,13 @@ local logger = require 'knightlinc/Write'
 logger.prefix = string.format("\at%s\ax", "[HUD]")
 logger.postfix = function () return string.format(" %s", os.date("%X")) end
 
-local settings = require 'settings'
+local settingsOpt = require 'settings'
 local hudInit = require 'hud'
 
-local hud = hudInit(settings.LoadConfig(), settings.SaveConfig)
+local settings = settingsOpt.LoadConfig()
+logger.loglevel = settings.loglevel
+
+local hud = hudInit(settings, settingsOpt.SaveConfig)
 
 while not hud.ShouldTerminate() do
   hud.Update(logger)

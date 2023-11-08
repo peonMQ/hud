@@ -192,4 +192,6 @@ local function init(settings, writeSettingsFile)
 
 end
 
+mq.bind("/hudsettings", settingsUI.OpenSettings)
+
 return init

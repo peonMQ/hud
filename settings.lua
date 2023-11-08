@@ -131,6 +131,7 @@ end
 ---@field opacity number
 local settings = {
   groups = {},
+  loglevel = 'info',
   ui = {
     locked = true,
     layoutType = 1,

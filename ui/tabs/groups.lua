@@ -74,17 +74,13 @@ local function RightPaneWindow(group)
   imgui.EndChild()
 end
 
-local function renderGroupTab(settings, writeSettingsFile)
+local function renderGroupTab(settings)
   if imgui.Button("Add group") then
     table.insert(settings.groups, {})
   end
   LeftPaneWindow(settings.groups)
   imgui.SameLine()
   RightPaneWindow(settings.groups[selectedGroup])
-
-  if imgui.Button("Apply") then
-    writeSettingsFile(settings)
-  end
 end
 
 return renderGroupTab

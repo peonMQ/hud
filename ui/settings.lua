@@ -9,14 +9,17 @@ local _open, _showUI = false, true
 local function renderSettingsWindow(settings, writeSettingsFile)
   if imgui.BeginTabBar("HUDSETTINGSTAB##", ImGuiTabBarFlags.None) then
     if imgui.BeginTabItem("General") then
-      renderGeneralTab(settings, writeSettingsFile)
+      renderGeneralTab(settings)
       imgui.EndTabItem()
     end
     if imgui.BeginTabItem("Groups") then
-      renderGroupTab(settings, writeSettingsFile)
+      renderGroupTab(settings)
       imgui.EndTabItem()
     end
     imgui.EndTabBar()
+  end
+  if imgui.Button("Apply") then
+    writeSettingsFile(settings)
   end
 end
 
