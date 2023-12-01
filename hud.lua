@@ -104,50 +104,50 @@ local function init(settings, writeSettingsFile)
         imgui.TableSetupColumn('Pet', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Pet)
         imgui.TableSetupColumn('Cast', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Casting)
         imgui.TableSetupColumn('PIDs', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_PIDs)
-      end
 
-      imgui.TableHeadersRow()
+        imgui.TableHeadersRow()
 
-      if settings.ui.layoutType == 2 then
-        for i, groupNames in ipairs(settings.groups) do
-          local renderGroupSpacing = i > 1 and i < #settings.groups
-          for k,name in ipairs(groupNames) do
-            local hudBotData = hudData[name]
-            if hudBotData then
-              if renderGroupSpacing then
-                imgui.TableNextRow()
-                imgui.TableNextRow()
-                imgui.TableNextRow()
+        if settings.ui.layoutType == 2 then
+          for i, groupNames in ipairs(settings.groups) do
+            local renderGroupSpacing = i > 1 and i < #settings.groups
+            for k,name in ipairs(groupNames) do
+              local hudBotData = hudData[name]
+              if hudBotData then
+                if renderGroupSpacing then
+                  imgui.TableNextRow()
+                  imgui.TableNextRow()
+                  imgui.TableNextRow()
+                end
+
+                renderHutBot(hudBotData)
+                renderGroupSpacing = false
               end
-
-              renderHutBot(hudBotData)
-              renderGroupSpacing = false
             end
           end
-        end
-      else
-        for _, netbot in pairs(hudData) do
-          renderHutBot(netbot)
-        end
-      end
-
-      for column=0,9 do
-        imgui.PushID(column)
-        if imgui.TableGetHoveredColumn() > 0 and imgui.IsMouseReleased(1) then
-          imgui.OpenPopup("TablePopup", ImGuiPopupFlags.NoOpenOverExistingPopup)
-        end
-        if imgui.BeginPopup("TablePopup") then
-          imgui.Text("Settings")
-          if imgui.IsItemClicked(ImGuiMouseButton.Left) then
-            settingsUI.OpenSettings()
-            imgui.CloseCurrentPopup()
+        else
+          for _, netbot in pairs(hudData) do
+            renderHutBot(netbot)
           end
-          imgui.EndPopup()
         end
-        imgui.PopID()
-      end
 
-      imgui.EndTable()
+        for column=0,9 do
+          imgui.PushID(column)
+          if imgui.TableGetHoveredColumn() > 0 and imgui.IsMouseReleased(1) then
+            imgui.OpenPopup("TablePopup", ImGuiPopupFlags.NoOpenOverExistingPopup)
+          end
+          if imgui.BeginPopup("TablePopup") then
+            imgui.Text("Settings")
+            if imgui.IsItemClicked(ImGuiMouseButton.Left) then
+              settingsUI.OpenSettings()
+              imgui.CloseCurrentPopup()
+            end
+            imgui.EndPopup()
+          end
+          imgui.PopID()
+        end
+
+        imgui.EndTable()
+      end
     end
     imgui.End()
     if not openGUI then
