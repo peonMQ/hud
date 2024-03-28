@@ -1,8 +1,9 @@
 local mq = require 'mq'
 local imgui = require 'ImGui'
-local logger = require 'knightlinc/Write'
+local logger = require 'knightlinc.Write'
 local hudBot = require 'hudbot'
-local settingsUI = require 'ui/settings'
+local actor = require 'actor'
+local settingsUI = require 'ui.settings'
 
 local function init(settings, writeSettingsFile)
   settingsUI.Init(settings, writeSettingsFile)
@@ -13,7 +14,7 @@ local function init(settings, writeSettingsFile)
   local openGUI = true
   local shouldDrawGUI = true
   local terminate = false
-  local windowFlags = bit32.bor(ImGuiWindowFlags.NoDecoration, ImGuiWindowFlags.NoDocking, ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoSavedSettings, ImGuiWindowFlags.NoFocusOnAppearing, ImGuiWindowFlags.NoNav)
+  local windowFlags = bit32.bor(ImGuiWindowFlags.NoDecoration, ImGuiWindowFlags.NoDocking, ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoFocusOnAppearing, ImGuiWindowFlags.NoNav)
   local windowFlagsLock = bit32.bor(windowFlags, ImGuiWindowFlags.NoMove)
   local tableFlags = bit32.bor(ImGuiTableFlags.PadOuterX, ImGuiTableFlags.Hideable)
 
@@ -78,10 +79,9 @@ local function init(settings, writeSettingsFile)
   local ColumnID_Casting = 8
   local ColumnID_PIDs = 9
 
-  local valueChanged = false
-
   -- ImGui main function for rendering the UI window
   local hud = function()
+    if not openGUI then return end
     imgui.SetNextWindowBgAlpha(settings.ui.opacity)
     PushStyleCompact()
     if settings.ui.locked then
@@ -149,6 +149,7 @@ local function init(settings, writeSettingsFile)
         imgui.EndTable()
       end
     end
+
     imgui.End()
     if not openGUI then
         terminate = true
@@ -157,25 +158,19 @@ local function init(settings, writeSettingsFile)
 
   mq.imgui.init('hud', hud)
 
-  local function udpateHudData(logger)
+  local function updateHudData()
     for name, _ in pairs(hudData) do
-      if not mq.TLO.NetBots(name).ID() then
-        logger.Warn("NetBot %s not found, removing from HUD...", name)
+      if not actor.Data[name] then
+        logger.Warn("<HudBot data for %s not found, removing from HUD...", name)
         hudData[name] = nil
       end
     end
 
-    for i=1,mq.TLO.NetBots.Counts() do
-      local name = mq.TLO.NetBots.Client(i)()
-      if name and name ~= "NULL" then
-        local netbot = mq.TLO.NetBots(name) --[[@as netbot]]
-        if not hudData[name] then
-          hudData[name] = hudBot:New(netbot)
-        else
-          hudData[name]:Update(netbot)
-        end
+    for name, data in pairs(actor.Data) do
+      if not hudData[name] then
+        hudData[name] = hudBot:New(data)
       else
-        logger.Warn("NetBot <%s> is NULL, skipping...", i)
+        hudData[name]:Update(data)
       end
     end
   end
@@ -185,9 +180,15 @@ local function init(settings, writeSettingsFile)
       return terminate
   end
 
+  ---@param doDraw boolean
+  local function shouldDrawGui(doDraw)
+    openGUI = doDraw
+  end
+
   return {
-      ShouldTerminate = shouldTerminate,
-      Update = udpateHudData,
+    ShouldDrawGui = shouldDrawGui,
+    ShouldTerminate = shouldTerminate,
+    Update = updateHudData,
   }
 
 end

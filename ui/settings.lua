@@ -1,6 +1,6 @@
 local imgui = require 'ImGui'
 local mq = require 'mq'
-local logger = require 'knightlinc/Write'
+local logger = require 'knightlinc.Write'
 local renderGeneralTab = require 'ui/tabs/general'
 local renderGroupTab = require 'ui/tabs/groups'
 

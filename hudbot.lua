@@ -93,59 +93,59 @@ local function newHUDItem (text, color)
   return { Text = text or "NA", Color = color or White:Unpack() };
 end
 
----@param netbot netbot
-local function name(netbot)
-  if netbot.Counters() ~= "NULL" and netbot.Counters() > 0 then
-    return newHUDItem(netbot.Name(), Red:Unpack())
+---@param data HUDInfo
+local function name(data)
+  if data.HasCounters then
+    return newHUDItem(data.Name, Red:Unpack())
   end
 
-  if netbot.Raid() ~= "NULL" and netbot.Raid() then
-    return newHUDItem(netbot.Name(), Cyan:Unpack())
+  if data.IsInRaid then
+    return newHUDItem(data.Name, Cyan:Unpack())
   end
 
-  if netbot.Grouped() ~= "NULL" and netbot.Grouped() then
-    return newHUDItem(netbot.Name(), Green:Unpack())
+  if data.IsGrouped then
+    return newHUDItem(data.Name, Green:Unpack())
   end
 
-  return newHUDItem(netbot.Name());
+  return newHUDItem(data.Name);
 end
 
----@param netbot netbot
-local function level(netbot)
-  return newHUDItem(""..netbot.Level())
+---@param data HUDInfo
+local function level(data)
+  return newHUDItem(""..data.Level)
 end
 
----@param netbot netbot
-local function pctHP(netbot)
-  return newHUDItem(netbot.PctHPs().."%", hpTransition:ByPercent(netbot.PctHPs()))
+---@param data HUDInfo
+local function pctHP(data)
+  return newHUDItem(data.PctHPs.."%", hpTransition:ByPercent(data.PctHPs))
 end
 
----@param netbot netbot
-local function pctMana(netbot)
-  if netbot.MaxMana() ~= "NULL" and netbot.MaxMana() > 0 then
-    return newHUDItem(netbot.PctMana().."%", mpTransition:ByPercent(netbot.PctMana()))
+---@param data HUDInfo
+local function pctMana(data)
+  if data.MaxMana > 0 then
+    return newHUDItem(data.PctMana.."%", mpTransition:ByPercent(data.PctMana))
   end
 
   return newHUDItem("")
 end
 
----@param netbot netbot
-local function pctExp(netbot)
-  if netbot.PctExp() ~= "NULL" and netbot.PctExp() < 100 then
-    return newHUDItem(string.format("%.2f", netbot.PctExp()).."%", PastelGreen:Unpack())
+---@param data HUDInfo
+local function pctExp(data)
+  if data.PctExp < 100 then
+    return newHUDItem(string.format("%.2f", data.PctExp).."%", PastelGreen:Unpack())
   end
 
   return newHUDItem("-", PastelGreen:Unpack())
 end
 
----@param netbot netbot
-local function distance(netbot)
+---@param data HUDInfo
+local function distance(data)
   local distanceText = "%s"
   local distanceColor = nil
-  if netbot.ID() == mq.TLO.Me.ID() then
+  if data.Id == mq.TLO.Me.ID() then
     distanceText = ""
-  elseif netbot.InZone() then
-    local spawnDistance = mq.TLO.Spawn(netbot.ID()).Distance3D()
+  elseif data.ZoneShortName == mq.TLO.Zone.ShortName() then
+    local spawnDistance = mq.TLO.Spawn(data.Id).Distance3D()
     if spawnDistance then
       local distancePercent = 100 - (math.min(spawnDistance, 500) / 500 * 100)
       distanceColor = distTransition:ByPercent(distancePercent)
@@ -153,24 +153,24 @@ local function distance(netbot)
     end
   else
     distanceColor = Orange:Unpack()
-    local instanceId = netbot.Instance()
+    local instanceId = data.InstanceId
     if instanceId > 0 then
-      local text = string.format("%s[%d]", mq.TLO.Zone(netbot.Zone()).ShortName(), instanceId)
+      local text = string.format("%s[%d]", data.ZoneShortName, instanceId)
       distanceText = string.format(distanceText, text)
     else
-      distanceText = string.format(distanceText, mq.TLO.Zone(netbot.Zone()).ShortName())
+      distanceText = string.format(distanceText, data.ZoneShortName)
     end
   end
 
   return newHUDItem(distanceText, distanceColor)
 end
 
----@param netbot netbot
-local function target(netbot)
+---@param data HUDInfo
+local function target(data)
   local targetText = ""
   local targetColor = White
-  if netbot.TargetID() then
-    local spawn = mq.TLO.Spawn(netbot.TargetID())
+  if data.TargetId then
+    local spawn = mq.TLO.Spawn(data.TargetId)
     if spawn() then
       local targetName = string.format("[%d] %s", spawn.ID(), spawn.CleanName())
       if string.len(targetName) > 20 then
@@ -187,30 +187,30 @@ local function target(netbot)
   return newHUDItem(targetText, targetColor:Unpack())
 end
 
----@param netbot netbot
-local function pet(netbot)
+---@param data HUDInfo
+local function pet(data)
   local petText = ""
-  if netbot.PetID() ~= "NULL"and netbot.PetID() > 0 then
-    petText = netbot.PetHP().."%"
+  if data.PetPctHPs then
+    petText = data.PetPctHPs.."%"
   end
-  return newHUDItem(petText, hpTransition:ByPercent(netbot.PetHP()))
+  return newHUDItem(petText, hpTransition:ByPercent(data.PetPctHPs))
 end
 
----@param netbot netbot
-local function casting(netbot)
+---@param data HUDInfo
+local function casting(data)
   local castingText = ""
-  if netbot.Casting() ~= "NULL" then
-    castingText = netbot.Casting()
+  if data.Casting then
+    castingText = data.Casting
   end
 
   return newHUDItem(castingText, Yellow:Unpack())
 end
 
----@param netbot netbot
-local function pids(netbot)
+---@param data HUDInfo
+local function pids(data)
   local pidsText = "NA"
-  if netbot.Note() ~= "NULL" then
-    pidsText = netbot.Note()
+  if data.RunningScripts or data.RunningScripts:len() == 0 then
+    pidsText = data.RunningScripts
   end
   return newHUDItem(pidsText, White:Unpack())
 end
@@ -228,36 +228,36 @@ end
 ---@field public Pet HUDItem
 local HUDBot = {Name=HUDItem, Level=HUDItem, PctHP=HUDItem, PctMana=HUDItem, PctExp=HUDItem, Distance=HUDItem, Target=HUDItem, Casting=HUDItem, Pet=HUDItem, PIDs=HUDItem}
 
----@param netbot netbot
+---@param data HUDInfo
 ---@return HUDBot
-function HUDBot:New (netbot)
+function HUDBot:New (data)
   self.__index = self
   local o = setmetatable({}, self)
-  o.Name = name(netbot)
-  o.Level = level(netbot)
-  o.PctHP = pctHP(netbot)
-  o.PctMana = pctMana(netbot)
-  o.PctExp = pctExp(netbot)
-  o.Distance = distance(netbot)
-  o.Target = target(netbot)
-  o.Pet = pet(netbot)
-  o.Casting = casting(netbot)
-  o.PIDs = pids(netbot)
+  o.Name = name(data)
+  o.Level = level(data)
+  o.PctHP = pctHP(data)
+  o.PctMana = pctMana(data)
+  o.PctExp = pctExp(data)
+  o.Distance = distance(data)
+  o.Target = target(data)
+  o.Pet = pet(data)
+  o.Casting = casting(data)
+  o.PIDs = pids(data)
   return o
 end
 
----@param netbot netbot
-function HUDBot:Update (netbot)
-  self.Name = name(netbot)
-  self.Level = level(netbot)
-  self.PctHP = pctHP(netbot)
-  self.PctMana = pctMana(netbot)
-  self.PctExp = pctExp(netbot)
-  self.Distance = distance(netbot)
-  self.Target = target(netbot)
-  self.Pet = pet(netbot)
-  self.Casting = casting(netbot)
-  self.PIDs = pids(netbot)
+---@param data HUDInfo
+function HUDBot:Update (data)
+  self.Name = name(data)
+  self.Level = level(data)
+  self.PctHP = pctHP(data)
+  self.PctMana = pctMana(data)
+  self.PctExp = pctExp(data)
+  self.Distance = distance(data)
+  self.Target = target(data)
+  self.Pet = pet(data)
+  self.Casting = casting(data)
+  self.PIDs = pids(data)
 end
 
 return HUDBot

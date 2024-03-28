@@ -1,5 +1,5 @@
 local mq = require 'mq'
-local logger = require 'knightlinc/Write'
+local logger = require 'knightlinc.Write'
 
 local function isArray(t)
   local i = 0
@@ -132,6 +132,7 @@ end
 local settings = {
   groups = {},
   loglevel = 'info',
+  update_frequency = 300,
   ui = {
     locked = true,
     layoutType = 1,
@@ -158,7 +159,7 @@ end
 local pathSep = package.config:sub(1,1)
 local configDir = mq.configDir
 local serverName = mq.TLO.MacroQuest.Server()
-local configFilePath = string.format("%s/%s/%s", configDir, serverName, "data/HUD.lua")
+local configFilePath = string.format("%s/hud/%s/%s", configDir, serverName, "settings.lua")
 if pathSep ~= "/" then
   configFilePath = configFilePath:gsub("/", "\\")
 end

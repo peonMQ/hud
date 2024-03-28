@@ -1,7 +1,7 @@
 local imgui = require 'ImGui'
 local mq = require 'mq'
 local icons = require 'mq/icons'
-local logger = require 'knightlinc/Write'
+local logger = require 'knightlinc.Write'
 local renderCombobox = require 'ui/controls/combobox'
 
 ---@type string[]

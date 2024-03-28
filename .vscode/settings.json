@@ -21,5 +21,7 @@
         "./definitions/mq",
         "./definitions/imgui",
         "./knightlinc",
+        "c:\\Users\\asp\\AppData\\Roaming\\Code\\User\\globalStorage\\zenithcodeforge.mq-defs\\file-downloader-downloads\\macroquest\\mq-definitions-master"
     ],
+    "mq-defs.etag": "W/\"8091a768881791534e4890a78b3509c577605e048ae8ff7cca68de6ad1912b61\"",
 }
