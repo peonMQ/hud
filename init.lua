@@ -23,8 +23,9 @@ local function is_orchestrator()
 end
 
 while not hud.ShouldTerminate() do
-  actor.Process()
+  actor.Process(settings)
   hud.Update()
   hud.ShouldDrawGui(is_orchestrator())
   mq.delay(settings.update_frequency)
 end
+

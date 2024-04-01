@@ -37,10 +37,13 @@ local function getRunningScripts()
   local scriptNames = {};
 
   for _, scriptPID in pairs(pids) do
-    local scriptNamePath = mq.TLO.Lua.Script(tonumber(scriptPID)).Name()
-    if scriptNamePath ~= "hud/pids" then
-      local scriptNamePathVars = utils.String.Split(scriptNamePath, "/")
-      table.insert(scriptNames, scriptNamePathVars[#scriptNamePathVars])
+    local pid = tonumber(scriptPID)
+    if pid then
+      local scriptNamePath = mq.TLO.Lua.Script(pid).Name()
+      if scriptNamePath ~= "hud/pids" then
+        local scriptNamePathVars = utils.String.Split(scriptNamePath, "/")
+        table.insert(scriptNames, scriptNamePathVars[#scriptNamePathVars])
+      end
     end
   end
 
@@ -90,17 +93,18 @@ local function broadcastHudInfo()
   actor:send(hudinfo)
 end
 
-local staleDataTimeout = 10000
-local function cleanup()
+---@param settings HUDSettings
+local function cleanup(settings)
   for name, data in pairs(hudActors) do
-      if mq.gettime() - (data.LastUpdated or 0) > staleDataTimeout then
+      if mq.gettime() - (data.LastUpdated or 0) > settings.stale_data_timer*60000 then
         hudActors[name] = nil
       end
   end
 end
 
-local function process()
-  cleanup()
+---@param settings HUDSettings
+local function process(settings)
+  cleanup(settings)
 
   local inGame = mq.TLO.EverQuest.GameState()
   if inGame == 'INGAME' then broadcastHudInfo() end

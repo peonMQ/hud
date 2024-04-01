@@ -127,12 +127,16 @@ end
 ---@class HUDSettings
 ---@field groups table
 ---@field layoutType LayoutTypes
+---@field update_frequency number
+---@field stale_data_timer number
+---@field loglevel string
 ---@field scale number
 ---@field opacity number
 local settings = {
   groups = {},
   loglevel = 'info',
   update_frequency = 300,
+  stale_data_timer = 0.1,
   ui = {
     locked = true,
     layoutType = 1,

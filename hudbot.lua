@@ -198,9 +198,9 @@ end
 
 ---@param data HUDInfo
 local function casting(data)
-  local castingText = ""
-  if data.Casting then
-    castingText = data.Casting
+  local castingText = data.Casting
+  if not castingText then
+    castingText = ""
   end
 
   return newHUDItem(castingText, Yellow:Unpack())

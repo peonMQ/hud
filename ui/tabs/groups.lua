@@ -8,7 +8,7 @@ local leftPanelWidth = 200
 local selectedGroup = 0
 local function LeftPaneWindow(groups)
   local x,y = imgui.GetContentRegionAvail()
-  if imgui.BeginChild("left", leftPanelWidth, y-21, true) then
+  if imgui.BeginChild("left", leftPanelWidth, y-21) then
     for k,v in ipairs(groups) do
       if imgui.Button(icons.FA_TRASH.."##delgroup"..k) then
         groups[k] = nil
@@ -39,7 +39,7 @@ end
 
 local function RightPaneWindow(group)
   local x,y = imgui.GetContentRegionAvail()
-  if imgui.BeginChild("right", x, y-21, true) then
+  if imgui.BeginChild("right", x, y-21) then
     if group then
       for i, value in ipairs(group) do
         imgui.Text(i..":")

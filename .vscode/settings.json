@@ -1,7 +1,6 @@
 {
     "editor.bracketPairColorization.enabled": true,
     "files.exclude": {
-        "definitions/": true,
         "knightlinc/": true,
     },
     "workbench.colorCustomizations": {
@@ -16,12 +15,10 @@
     "editor.detectIndentation": true,
     "editor.insertSpaces": true,
     "editor.tabSize": 2,
-    "Lua.runtime.version": "Lua 5.1",
+    "Lua.runtime.version": "LuaJIT",
     "Lua.workspace.library": [
-        "./definitions/mq",
-        "./definitions/imgui",
         "./knightlinc",
         "c:\\Users\\asp\\AppData\\Roaming\\Code\\User\\globalStorage\\zenithcodeforge.mq-defs\\file-downloader-downloads\\macroquest\\mq-definitions-master"
     ],
-    "mq-defs.etag": "W/\"8091a768881791534e4890a78b3509c577605e048ae8ff7cca68de6ad1912b61\"",
+    "mq-defs.etag": "W/\"267578af0228540a14ee5b2c038e3b3150c85f2af439feda347c67c870c3c259\"",
 }
