@@ -97,6 +97,7 @@ end
 local function cleanup(settings)
   for name, data in pairs(hudActors) do
       if mq.gettime() - (data.LastUpdated or 0) > settings.stale_data_timer*60000 then
+        logger.Debug("Stale data for %s, last updated %s (ms) ago", name, mq.gettime() - (data.LastUpdated or 0))
         hudActors[name] = nil
       end
   end

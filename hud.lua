@@ -161,7 +161,7 @@ local function init(settings, writeSettingsFile)
   local function updateHudData()
     for name, _ in pairs(hudData) do
       if not actor.Data[name] then
-        logger.Warn("<HudBot data for %s not found, removing from HUD...", name)
+        logger.Debug("<HudBot data for %s not found, removing from HUD...", name)
         hudData[name] = nil
       end
     end
