@@ -109,7 +109,7 @@ local function init(settings, writeSettingsFile)
 
         if settings.ui.layoutType == 2 then
           for i, groupNames in ipairs(settings.groups) do
-            local renderGroupSpacing = i > 1 and i < #settings.groups
+            local renderGroupSpacing = i > 1 and i <= #settings.groups
             for k,name in ipairs(groupNames) do
               local hudBotData = hudData[name]
               if hudBotData then
