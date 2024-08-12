@@ -59,6 +59,7 @@ end
 local function handleMessage(message)
   if message.sender.character then
     local hudinfo = message.content
+    hudinfo.LastUpdated = mq.gettime()
     hudActors[message.sender.character] = hudinfo
   end
 end
@@ -86,8 +87,7 @@ local function broadcastHudInfo()
     HasCounters = mq.TLO.Debuff.Counters() > 0,
     IsInRaid = mq.TLO.Raid.Members() and mq.TLO.Raid.Members() > 0,
     IsGrouped = me.Grouped(),
-    RunningScripts = getRunningScripts(),
-    LastUpdated = mq.gettime()
+    RunningScripts = getRunningScripts()
   }
 
   actor:send(hudinfo)
