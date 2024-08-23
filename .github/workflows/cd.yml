@@ -49,12 +49,12 @@ jobs:
 
         CopyLib("knightlinc")
 
-        7z a -tzip $env:BUNDLE_FILE_NAME -r ($env:PROJECT + "/*.lua")
+        7z a -tzip $env:BUNDLE_FILE_NAME_${{ github.ref_name }} -r ($env:PROJECT + "/*.lua")
 
     - name: Publish
       uses: softprops/action-gh-release@v1
       with:
-        files: hud.zip
+        files: hud_${{ github.ref_name }}.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
