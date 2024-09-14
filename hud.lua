@@ -79,15 +79,18 @@ local function init(settings, writeSettingsFile)
   local ColumnID_Casting = 8
   local ColumnID_PIDs = 9
 
+  local eq_path = mq.TLO.EverQuest.Path()
+  eq_path = eq_path:gsub('.*%\\', '') -- https://stackoverflow.com/questions/74408159/lua-help-to-get-an-end-of-string-after-last-special-character
+
   -- ImGui main function for rendering the UI window
   local hud = function()
     if not openGUI then return end
     imgui.SetNextWindowBgAlpha(settings.ui.opacity)
     PushStyleCompact()
     if settings.ui.locked then
-      openGUI, shouldDrawGUI = imgui.Begin('HUD', openGUI, windowFlagsLock)
+      openGUI, shouldDrawGUI = imgui.Begin(('HUD###hud_%s'):format(eq_path), openGUI, windowFlagsLock) -- https://discord.com/channels/511690098136580097/866047684242309140/1268289663546949773
     else
-      openGUI, shouldDrawGUI = imgui.Begin('HUD', openGUI, windowFlags)
+      openGUI, shouldDrawGUI = imgui.Begin(('HUD###hud_%s'):format(eq_path), openGUI, windowFlags) -- https://discord.com/channels/511690098136580097/866047684242309140/1268289663546949773
     end
     PopStyleCompact()
     imgui.SetWindowSize(430, 277)
