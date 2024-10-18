@@ -95,8 +95,12 @@ end
 
 ---@param data HUDInfo
 local function name(data)
-  if data.HasCounters then
+  if data.IsFeared then
     return newHUDItem(data.Name, Red:Unpack())
+  end
+
+  if data.HasCounters then
+    return newHUDItem(data.Name, BloodOrange:Unpack())
   end
 
   if data.IsInRaid then

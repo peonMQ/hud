@@ -19,6 +19,7 @@ local mailbox = 'hudinfo'
 ---@field ZoneShortName string
 ---@field InstanceId number
 ---@field HasCounters? boolean
+---@field IsFeared boolean
 ---@field IsInRaid boolean
 ---@field IsGrouped boolean
 ---@field RunningScripts string
@@ -85,6 +86,7 @@ local function broadcastHudInfo()
     ZoneShortName = mq.TLO.Zone.ShortName(),
     InstanceId = me.Instance(),
     HasCounters = mq.TLO.Debuff.Counters() > 0,
+    IsFeared = me.Feared(),
     IsInRaid = mq.TLO.Raid.Members() and mq.TLO.Raid.Members() > 0,
     IsGrouped = me.Grouped(),
     RunningScripts = getRunningScripts()
