@@ -1,9 +1,9 @@
-local mq = require 'mq'
-local imgui = require 'ImGui'
-local logger = require 'knightlinc.Write'
-local hudBot = require 'hudbot'
-local actor = require 'actor'
-local settingsUI = require 'ui.settings'
+local mq = require('mq')
+local imgui = require('ImGui')
+local logger = require('knightlinc.Write')
+local hudBot = require('hudbot')
+local actor = require('actor')
+local settingsUI = require('ui.settings')
 
 local function init(settings, writeSettingsFile)
   settingsUI.Init(settings, writeSettingsFile)
@@ -14,8 +14,7 @@ local function init(settings, writeSettingsFile)
   local openGUI = true
   local shouldDrawGUI = true
   local terminate = false
-  local windowFlags = bit32.bor(ImGuiWindowFlags.NoDecoration, ImGuiWindowFlags.NoDocking, ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoFocusOnAppearing, ImGuiWindowFlags.NoNav)
-  local windowFlagsLock = bit32.bor(windowFlags, ImGuiWindowFlags.NoMove)
+  local windowFlags = bit32.bor(ImGuiWindowFlags.NoResize, ImGuiWindowFlags.NoScrollbar, ImGuiWindowFlags.NoDocking, ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoFocusOnAppearing, ImGuiWindowFlags.NoNav)
   local tableFlags = bit32.bor(ImGuiTableFlags.PadOuterX, ImGuiTableFlags.Hideable)
 
   ---@param hudItem HUDItem
@@ -85,16 +84,20 @@ local function init(settings, writeSettingsFile)
   -- ImGui main function for rendering the UI window
   local hud = function()
     if not openGUI then return end
+    local flags = windowFlags
+    if settings.ui.locked then
+      flags = bit32.bor(flags, ImGuiWindowFlags.NoMove)
+    end
+    if not settings.ui.showNavBar then
+      flags = bit32.bor(flags, ImGuiWindowFlags.NoTitleBar, ImGuiWindowFlags.NoCollapse)
+    end
+
     imgui.SetNextWindowBgAlpha(settings.ui.opacity)
     PushStyleCompact()
-    if settings.ui.locked then
-      openGUI, shouldDrawGUI = imgui.Begin(('HUD###hud_%s'):format(eq_path), openGUI, windowFlagsLock) -- https://discord.com/channels/511690098136580097/866047684242309140/1268289663546949773
-    else
-      openGUI, shouldDrawGUI = imgui.Begin(('HUD###hud_%s'):format(eq_path), openGUI, windowFlags) -- https://discord.com/channels/511690098136580097/866047684242309140/1268289663546949773
-    end
+    openGUI, shouldDrawGUI = imgui.Begin(('HUD###hud_%s'):format(eq_path), openGUI, flags) -- https://discord.com/channels/511690098136580097/866047684242309140/1268289663546949773
     PopStyleCompact()
-    imgui.SetWindowSize(430, 277)
     if shouldDrawGUI then
+      imgui.SetWindowSize(430, 277)
       imgui.SetWindowFontScale(settings.ui.scale)
       if imgui.BeginTable('hud_table', 10, tableFlags) then
         imgui.TableSetupColumn('Name', ImGuiTableColumnFlags.WidthFixed, -1.0, ColumnID_Name)
@@ -151,6 +154,8 @@ local function init(settings, writeSettingsFile)
 
         imgui.EndTable()
       end
+    elseif not settings.ui.showNavBar then
+      settings.ui.showNavBar = true
     end
 
     imgui.End()

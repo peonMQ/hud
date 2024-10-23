@@ -1,5 +1,5 @@
-local mq = require 'mq'
-local logger = require 'knightlinc.Write'
+local mq = require('mq')
+local logger = require('knightlinc.Write')
 
 local function isArray(t)
   local i = 0
@@ -124,14 +124,19 @@ end
 
 ---@alias LayoutTypes 1|2|3
 
+---@class UISettings
+---@field locked boolean
+---@field showNavBar boolean
+---@field layoutType LayoutTypes
+---@field scale number
+---@field opacity number
+
 ---@class HUDSettings
 ---@field groups table
----@field layoutType LayoutTypes
 ---@field update_frequency number
 ---@field stale_data_timer number
 ---@field loglevel string
----@field scale number
----@field opacity number
+---@field ui UISettings
 local settings = {
   groups = {},
   loglevel = 'info',
@@ -139,6 +144,7 @@ local settings = {
   stale_data_timer = 0.1,
   ui = {
     locked = true,
+    showNavBar = false,
     layoutType = 1,
     scale = 1.0,
     opacity = 0.3

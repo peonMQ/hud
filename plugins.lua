@@ -1,5 +1,5 @@
-local mq = require 'mq'
-local logger = require 'knightlinc.Write'
+local mq = require('mq')
+local logger = require('knightlinc.Write')
 
 local plugins = {}
 

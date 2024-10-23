@@ -1,8 +1,7 @@
-local imgui = require 'ImGui'
-local mq = require 'mq'
-local logger = require 'knightlinc.Write'
-local renderGeneralTab = require 'ui/tabs/general'
-local renderGroupTab = require 'ui/tabs/groups'
+local mq = require('mq')
+local imgui = require('ImGui')
+local renderGeneralTab = require('ui/tabs/general')
+local renderGroupTab = require('ui/tabs/groups')
 
 local _open, _showUI = false, true
 
@@ -18,7 +17,7 @@ local function renderSettingsWindow(settings, writeSettingsFile)
     end
     imgui.EndTabBar()
   end
-  if imgui.Button("Apply") then
+  if imgui.Button("Save to file") then
     writeSettingsFile(settings)
   end
 end

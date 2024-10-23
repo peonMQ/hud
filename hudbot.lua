@@ -1,4 +1,4 @@
-local mq = require 'mq'
+local mq = require('mq')
 
 -- https://jsfiddle.net/dkLec6xs/
 --[[

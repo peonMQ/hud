@@ -1,7 +1,7 @@
-local mq = require 'mq'
-local utils = require 'mq.Utils'
-local actors = require 'actors'
-local logger = require 'knightlinc.Write'
+local mq = require('mq')
+local utils = require('mq.Utils')
+local actors = require('actors')
+local logger = require('knightlinc.Write')
 
 local mailbox = 'hudinfo'
 

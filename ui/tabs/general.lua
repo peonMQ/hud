@@ -1,8 +1,6 @@
-local imgui = require 'ImGui'
-local mq = require 'mq'
-local icons = require 'mq/icons'
-local logger = require 'knightlinc.Write'
-local renderCombobox = require 'ui/controls/combobox'
+local imgui = require('ImGui')
+local logger = require('knightlinc.Write')
+local renderCombobox = require('ui/controls/combobox')
 
 ---@type string[]
 local validLogLevels = {}
@@ -14,6 +12,8 @@ end
 local function renderGeneralTab(settings)
   imgui.Text("Lock HUD")
   settings.ui.locked, _ = imgui.Checkbox("##LockHUD", settings.ui.locked)
+  imgui.Text("Show NavBar")
+  settings.ui.showNavBar, _ = imgui.Checkbox("##SHOWNAVBAR", settings.ui.showNavBar)
   imgui.Text("HUD render order")
   settings.ui.layoutType, _ = imgui.RadioButton("Name", settings.ui.layoutType, 1)
   if next(settings.groups) then
