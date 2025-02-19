@@ -22,12 +22,12 @@ local function init(settings, writeSettingsFile)
     imgui.PushStyleVar(ImGuiStyleVar.ItemInnerSpacing, 2, 2)
     if hudItem.Text == "" then
       imgui.Text("")
-      return
+    else
+      imgui.PushStyleColor(ImGuiCol.Text, hudItem.Color)
+      imgui.Text(hudItem.Text)
+      imgui.PopStyleColor(1)
     end
 
-    imgui.PushStyleColor(ImGuiCol.Text, hudItem.Color)
-    imgui.Text(hudItem.Text)
-    imgui.PopStyleColor(1)
     imgui.PopStyleVar(1)
   end
 
